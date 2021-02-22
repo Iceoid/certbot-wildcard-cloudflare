@@ -13,7 +13,8 @@ fi
 ${SUDO} apt remove certbot
 ${SUDO} apt autoremove
 ${SUDO} apt update -y
-${SUDO} snap install core -y; sudo snap refresh core -y
+${SUDO} apt install snapd
+${SUDO} snap install core -y; ${SUDO} snap refresh core -y
 ${SUDO} snap install --classic certbot -y
 ${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
 ${SUDO} snap set certbot trust-plugin-with-root=ok
