@@ -20,13 +20,13 @@ if [[ "${response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
 fi
 
 
-${SUDO} snap install core -y; ${SUDO} snap refresh core
-${SUDO} snap install --classic certbot -y
+${SUDO} snap install core; ${SUDO} snap refresh core
+${SUDO} snap install --classic certbot
 ${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
 ${SUDO} snap set certbot trust-plugin-with-root=ok
 
 # For Cloudflare DNS provider
-${SUDO} snap install certbot-dns-cloudflare -y
+${SUDO} snap install certbot-dns-cloudflare
 
 read -rp "Enter the domain name to be used:"$'\n' dname
 if [[ ${dname} != "" ]]; then
