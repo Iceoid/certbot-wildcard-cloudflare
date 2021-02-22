@@ -1,22 +1,10 @@
 #!/bin/bash
 
-# ### VARS ###
-# LOGDIR=/var/log/certbot_renewals
-# ### LOGS ###
-# mkdir -p /var/log/certbot_renewals
-# NOW=$(date +"%F--%N")
-# LOGFILENAME="certbot-renewal-log-$NOW.log"
-# touch $LOGDIR/$LOGFILENAME
+### Certbot Renewal ###
 
-# ### CERTBOT Renewal ###
-# $(sudo certbot renew) > $LOGFILE
+certbot_response=$(sudo certbot renew)
 
-
-############# CERTBOT Renewal ##############
-
-certbot_response=$(certbot renew --renew-by-default)
-
-############# LOGS #########################
+### LOGS ###
 
 NOW=$(date +"%F--%N")
 LOGFILENAME="certbot-renewal-log-$NOW.log"
