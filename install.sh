@@ -54,7 +54,7 @@ if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     certbot renew --dry-run
 fi
 
-cp certbot_renewal.sh ${RENEWAL_SCRIPT}
+cp ${PWD}/certbot_renewal.sh ${RENEWAL_SCRIPT}
 chmod +x ${RENEWAL_SCRIPT}
 chown $USER:$USER ${RENEWAL_SCRIPT}
 
