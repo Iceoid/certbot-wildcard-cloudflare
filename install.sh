@@ -10,6 +10,8 @@ if [[ $EUID -ne 0 ]]; then
    SUDO='sudo'
 fi
 
+${SUDO} apt remove certbot
+${SUDO} apt autoremove
 ${SUDO} apt update -y
 ${SUDO} snap install core -y; sudo snap refresh core -y
 ${SUDO} snap install --classic certbot -y
