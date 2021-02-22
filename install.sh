@@ -56,7 +56,7 @@ fi
 ### Create Certificates ###
 read -rp "Would you like to use the Let's encrypt production environment? ('No' will use the staging environment instead) [y/N] " init_response
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
-    ${SUDO} certbot certonly --agree-tos Agree --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    ${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
 else
     ${SUDO} certbot certonly --dry-run --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
 fi
