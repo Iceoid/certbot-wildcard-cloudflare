@@ -12,7 +12,7 @@ fi
 
 
 ### Install dependencies ###
-${SUDO} apt update -y
+${SUDO} apt update
 
 read -rp "Remove OS packaged certbot and install snapd ? [y/N] " response
 if [[ "${response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
