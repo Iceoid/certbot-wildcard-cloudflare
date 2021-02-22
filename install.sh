@@ -10,10 +10,16 @@ if [[ $EUID -ne 0 ]]; then
    SUDO='sudo'
 fi
 
-${SUDO} apt remove certbot
-${SUDO} apt autoremove
 ${SUDO} apt update -y
-${SUDO} apt install snapd
+
+read -rp "Remove OS packaged certbot and install the official snap package?"$'\n' response
+if [[ "${response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
+    ${SUDO} apt remove certbot -y
+    ${SUDO} apt autoremove -y
+    ${SUDO} apt install snapd -y
+fi
+
+
 ${SUDO} snap install core -y; ${SUDO} snap refresh core -y
 ${SUDO} snap install --classic certbot -y
 ${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
