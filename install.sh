@@ -5,7 +5,7 @@ DOMAIN_NAME=""
 CF_INI_FILE=~/.secrets/cloudflare.ini
 RENEWAL_SCRIPT=/usr/local/bin/certbot_renewal.sh
 
-
+sudo apt update -y
 sudo snap install core -y; sudo snap refresh core -y
 sudo snap install --classic certbot -y
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
