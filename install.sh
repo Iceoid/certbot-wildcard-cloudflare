@@ -10,47 +10,45 @@ if [[ $EUID -ne 0 ]]; then
    SUDO='sudo'
 fi
 
+
+### Install dependencies ###
 ${SUDO} apt update -y
 
-read -rp "Remove OS packaged certbot and install the official snap package?"$'\n' response
+read -rp "Remove OS packaged certbot and install snapd ? [y/N] " response
 if [[ "${response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     ${SUDO} apt remove certbot
     ${SUDO} apt autoremove
     ${SUDO} apt install snapd
 fi
 
-
 ${SUDO} snap install core; ${SUDO} snap refresh core
 ${SUDO} snap install --classic certbot
 ${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
 ${SUDO} snap set certbot trust-plugin-with-root=ok
-
-# For Cloudflare DNS provider
 ${SUDO} snap install certbot-dns-cloudflare
 
-read -rp "Enter the domain name to be used:"$'\n' dname
-if [[ ${dname} != "" ]]; then
-    DOMAIN_NAME=${dname}
-fi
 
-mkdir ~/.secrets
-touch ${CF_INI_FILE}
-> ${CF_INI_FILE}
+### Init files and get required information ###
+while [[ -z "${DOMAIN_NAME}" ]]; do
+    read -rp "Enter the domain name to be used:"$'\n' dname
+    DOMAIN_NAME=${dname}
+done
+
+if [[ ! -f "${CF_INI_FILE}" ]]; then
+    mkdir ~/.secrets
+    touch ${CF_INI_FILE}
+fi
 chmod 600 ${CF_INI_FILE}
 chmod 600 -R ~/.secrets
 
-
-# read -rp "Enter your cloudflare email:"$'\n' CF_EMAIL
-# echo "dns_cloudflare_email = ${CF_EMAIL}" >> ${CF_INI_FILE}
-
-# read -rp "Enter your cloudflare Global API Key:"$'\n' CF_API_KEY
-# echo "dns_cloudflare_api_key = ${CF_API_KEY}" >> ${CF_INI_FILE}
-
-read -rp "Enter your cloudflare API Token:"$'\n' CF_API_TOKEN
-echo "dns_cloudflare_api_token = ${CF_API_TOKEN}" >> ~/.secrets/cloudflare.ini
+read -rp "Would you like to reset and enter cloudflare credentials? [y/N] " init_response
+if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
+    read -rp "Enter your cloudflare API Token:"$'\n' CF_API_TOKEN
+    echo "dns_cloudflare_api_token = ${CF_API_TOKEN}" >> ~/.secrets/cloudflare.ini
+fi
 
 
-### Create Certificates
+### Create Certificates ###
 read -rp "Would you like to use the Let's encrypt production environment? ('No' will use the staging environment instead) [y/N] " init_response
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
@@ -63,9 +61,11 @@ if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     certbot renew --dry-run
 fi
 
-cp ${PWD}/certbot_renewal.sh ${RENEWAL_SCRIPT}
-chmod +x ${RENEWAL_SCRIPT}
-chown $USER:$USER ${RENEWAL_SCRIPT}
+if [[ ! -f ${RENEWAL_SCRIPT} ]]; then
+    cp ${PWD}/certbot_renewal.sh ${RENEWAL_SCRIPT}
+    chmod +x ${RENEWAL_SCRIPT}
+    chown $USER:$USER ${RENEWAL_SCRIPT}
+fi
 
 crontab -u $USER -l | grep -v ${RENEWAL_SCRIPT}  | crontab -u $USER -
-{ crontab -l; echo "0 4 * * sudo bash ${RENEWAL_SCRIPT}"; } | crontab -
+{ crontab -l; echo "0 4 * * * sudo bash ${RENEWAL_SCRIPT}"; } | crontab -
