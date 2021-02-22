@@ -4,15 +4,20 @@
 DOMAIN_NAME=""
 CF_INI_FILE=~/.secrets/cloudflare.ini
 RENEWAL_SCRIPT=/usr/local/bin/certbot_renewal.sh
+SUDO=''
 
-sudo apt update -y
-sudo snap install core -y; sudo snap refresh core -y
-sudo snap install --classic certbot -y
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
-sudo snap set certbot trust-plugin-with-root=ok
+if [[ $EUID -ne 0 ]]; then
+   SUDO='sudo'
+fi
+
+${SUDO} apt update -y
+${SUDO} snap install core -y; sudo snap refresh core -y
+${SUDO} snap install --classic certbot -y
+${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
+${SUDO} snap set certbot trust-plugin-with-root=ok
 
 # For Cloudflare DNS provider
-sudo snap install certbot-dns-cloudflare -y
+${SUDO} snap install certbot-dns-cloudflare -y
 
 read -rp "Enter the domain name to be used:"$'\n' dname
 if [[ ${dname} != "" ]]; then
@@ -46,12 +51,12 @@ fi
 
 read -rp "Would you like to test the certificate renawal? [y/N] " init_response
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
-    sudo certbot renew --dry-run
+    certbot renew --dry-run
 fi
 
 cp certbot_renewal.sh ${RENEWAL_SCRIPT}
-sudo chmod +x ${RENEWAL_SCRIPT}
-sudo chown $USER:$USER ${RENEWAL_SCRIPT}
+chmod +x ${RENEWAL_SCRIPT}
+chown $USER:$USER ${RENEWAL_SCRIPT}
 
 crontab -u $USER -l | grep -v ${RENEWAL_SCRIPT}  | crontab -u $USER -
 { crontab -l; echo "0 4 * * sudo bash ${RENEWAL_SCRIPT}"; } | crontab -
