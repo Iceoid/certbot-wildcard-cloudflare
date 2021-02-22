@@ -53,5 +53,5 @@ cp certbot_renewal.sh ${RENEWAL_SCRIPT}
 sudo chmod +x ${RENEWAL_SCRIPT}
 sudo chown $USER:$USER ${RENEWAL_SCRIPT}
 
-crontab -l | grep -v ${RENEWAL_SCRIPT}  | crontab -
+crontab -u $USER -l | grep -v ${RENEWAL_SCRIPT}  | crontab -u $USER -
 { crontab -l; echo "0 4 * * sudo bash ${RENEWAL_SCRIPT}"; } | crontab -
