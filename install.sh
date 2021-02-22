@@ -14,13 +14,13 @@ ${SUDO} apt update -y
 
 read -rp "Remove OS packaged certbot and install the official snap package?"$'\n' response
 if [[ "${response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
-    ${SUDO} apt remove certbot -y
-    ${SUDO} apt autoremove -y
-    ${SUDO} apt install snapd -y
+    ${SUDO} apt remove certbot
+    ${SUDO} apt autoremove
+    ${SUDO} apt install snapd
 fi
 
 
-${SUDO} snap install core -y; ${SUDO} snap refresh core -y
+${SUDO} snap install core -y; ${SUDO} snap refresh core
 ${SUDO} snap install --classic certbot -y
 ${SUDO} ln -s /snap/bin/certbot /usr/bin/certbot
 ${SUDO} snap set certbot trust-plugin-with-root=ok
