@@ -58,11 +58,15 @@ read -rp "Would you like to use the Let's encrypt production environment? ('No' 
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     ${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
 else
-    ${SUDO} certbot certonly --dry-run --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    ${SUDO} certbot certonly --dry-run --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    read -rp "Would you now like to create a real certificate? [y/N] " prod_response
+    if [[ "${prod_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
+    	${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    fi
 fi
 
-read -rp "Would you like to test the certificate renawal? [y/N] " init_response
-if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
+read -rp "Would you like to test the certificate renawal? [y/N] " renew_response
+if [[ "${renew_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     ${SUDO} certbot renew --dry-run
 fi
 
