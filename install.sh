@@ -5,6 +5,7 @@ DOMAIN_NAME=""
 SECRETDIR=~/.secrets
 CF_INI_FILE=${SECRETDIR}/cloudflare.ini
 RENEWAL_SCRIPT=/usr/local/bin/certbot_renewal.sh
+EMAIL=""
 SUDO=''
 
 if [[ $EUID -ne 0 ]]; then
@@ -35,6 +36,11 @@ while [[ -z "${DOMAIN_NAME}" ]]; do
     DOMAIN_NAME=${dname}
 done
 
+while [[ -z "${EMAIL}" ]]; do
+    read -rp "Enter the email to be used:"$'\n' email
+    EMAIL=${email}
+done
+
 # Making sure log, config and work dirs are set for letsencrypt
 #${SUDO} mkdir -p /var/log/letsencrypt
 
@@ -49,19 +55,28 @@ read -rp "Would you like to reset and enter cloudflare credentials? [y/N] " init
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
     > ${CF_INI_FILE}
     read -rp "Enter your cloudflare API Token:"$'\n' CF_API_TOKEN
-    echo "dns_cloudflare_api_token = ${CF_API_TOKEN}" >> ~/.secrets/cloudflare.ini
+    echo "dns_cloudflare_api_token = ${CF_API_TOKEN}" > ~/.secrets/cloudflare.ini
 fi
 
 
 ### Create Certificates ###
+
+function get_staging_certs() {
+    ${SUDO} certbot certonly --dry-run --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -m ${EMAIL} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+}
+
+function get_prod_certs() {
+    ${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -m ${EMAIL} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+}
+
 read -rp "Would you like to use the Let's encrypt production environment? ('No' will use the staging environment instead) [y/N] " init_response
 if [[ "${init_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
-    ${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    get_prod_certs
 else
-    ${SUDO} certbot certonly --dry-run --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+    get_staging_certs
     read -rp "Would you now like to create a real certificate? [y/N] " prod_response
     if [[ "${prod_response}" =~ ^([yY]|[yY][eE][sS])$ ]]; then
-    	${SUDO} certbot certonly --agree-tos --dns-cloudflare --dns-cloudflare-credentials ${CF_INI_FILE} -d ${DOMAIN_NAME} -d *.${DOMAIN_NAME}
+        get_prod_certs
     fi
 fi
 
